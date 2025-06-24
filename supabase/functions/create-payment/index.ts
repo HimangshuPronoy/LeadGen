@@ -69,20 +69,13 @@ serve(async (req) => {
             name: "Basic Plan - One-time Payment",
             description: "500 leads per month, 15 storage packages"
           },
-          unit_amount: 2900, // $29.00
+          unit_amount: 4900, // $49.00
         },
         quantity: 1,
       });
     } else if (planType === 'premium') {
       lineItems.push({
-        price_data: {
-          currency: "usd",
-          product_data: { 
-            name: "Premium Plan - One-time Payment",
-            description: "Unlimited leads per month, 30 storage packages"
-          },
-          unit_amount: 4900, // $49.00
-        },
+        price: "price_1RdatxJjRarA6eH8Iweiz9gg",
         quantity: 1,
       });
     }

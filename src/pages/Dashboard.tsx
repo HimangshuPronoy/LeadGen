@@ -167,14 +167,14 @@ const Dashboard = () => {
               className="bg-gray-900 hover:bg-gray-800 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Get Basic Plan ($29)
+              Get Basic Plan ($49)
             </Button>
             <Button 
               onClick={() => createPayment('premium')}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Get Premium Plan ($49)
+              Get Premium Plan ($69)
             </Button>
           </div>
           <div className="mt-8">
