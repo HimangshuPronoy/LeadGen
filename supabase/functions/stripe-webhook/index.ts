@@ -48,11 +48,11 @@ serve(async (req) => {
         if (user_id && plan_type) {
           const planConfigs = {
             basic: {
-              leads_per_month: 500,
+              leads_per_month: 1000,
               max_storage_packages: 15
             },
             premium: {
-              leads_per_month: -1,
+              leads_per_month: 3000,
               max_storage_packages: 30
             }
           };

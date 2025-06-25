@@ -19,6 +19,7 @@ interface SubscriptionContextType {
   loading: boolean;
   canGenerateLeads: boolean;
   canSavePackage: boolean;
+  creditsRemaining: number;
   refreshSubscription: () => Promise<void>;
   createPayment: (planType: 'basic' | 'premium') => Promise<void>;
   createStorageUpgrade: () => Promise<void>;
@@ -135,9 +136,9 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     fetchSubscription();
   }, [user]);
 
-  const canGenerateLeads = subscription ? 
-    (subscription.plan_type === 'premium' || subscription.current_month_leads < subscription.leads_per_month) : 
-    false;
+  // Credit-based access control – user can generate leads as long as they have credits remaining
+  const creditsRemaining = subscription ? (subscription.leads_per_month - subscription.current_month_leads) : 0;
+  const canGenerateLeads = subscription ? creditsRemaining > 0 : false;
 
   const canSavePackage = subscription ? 
     subscription.used_storage_packages < subscription.max_storage_packages : 
@@ -148,6 +149,7 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
       subscription,
       loading,
       canGenerateLeads,
+      creditsRemaining,
       canSavePackage,
       refreshSubscription,
       createPayment,

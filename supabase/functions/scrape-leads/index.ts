@@ -12,12 +12,14 @@ serve(async (req) => {
   }
 
   try {
-    const { query, industry, location, companySize } = await req.json()
+    const { query, industry, location, companySize, leadCount } = await req.json()
+
+    const count = Math.min(Math.max(leadCount || 10, 1), 100)
     
-    console.log('Lead scraping request received:', { query, industry, location, companySize })
+    console.log('Lead scraping request received:', { query, industry, location, companySize, count })
 
     // Build the AI prompt for lead generation
-    const prompt = `You are an expert lead generation AI that creates realistic business prospects. Based on the following criteria, generate 6-8 high-quality business leads:
+    const prompt = `You are an expert lead generation AI that creates realistic business prospects. Based on the following criteria, generate ${count} high-quality business leads:
 
 Query: ${query}
 Industry: ${industry || 'Any'}
@@ -43,7 +45,7 @@ IMPORTANT:
 - Focus on companies that would genuinely benefit from lead generation services
 - Make the data feel authentic and actionable
 
-Return ONLY a JSON object with a "leads" array containing 6-8 lead objects. No other text.`
+Return ONLY a JSON object with a "leads" array containing ${count} lead objects. No other text.`
 
     // Call Deepseek V3 via OpenRouter
     const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -88,7 +90,7 @@ Return ONLY a JSON object with a "leads" array containing 6-8 lead objects. No o
     let leads
     try {
       const parsed = JSON.parse(aiContent)
-      leads = parsed.leads || []
+      leads = (parsed.leads || []).slice(0, count)
       console.log(`Successfully parsed ${leads.length} leads from AI`)
     } catch (e) {
       console.warn('Failed to parse AI response, falling back to mock data:', e)

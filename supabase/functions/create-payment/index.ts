@@ -66,18 +66,34 @@ serve(async (req) => {
         price_data: {
           currency: "usd",
           product_data: { 
-            name: "Basic Plan - One-time Payment",
-            description: "500 leads per month, 15 storage packages"
+            name: "1000 Credits Pack",
+            description: "Generate up to 1000 leads (1 credit = 1 lead), includes 15 storage packages"
           },
           unit_amount: 4900, // $49.00
         },
         quantity: 1,
       });
     } else if (planType === 'premium') {
-      lineItems.push({
-        price: "price_1RdatxJjRarA6eH8Iweiz9gg",
-        quantity: 1,
-      });
+      // Use preset Stripe Price ID for 3000 Credit Pack if configured, else fallback to inline price data
+      const premiumPriceId = Deno.env.get("STRIPE_PREMIUM_CREDIT_PRICE_ID");
+      if (premiumPriceId) {
+        lineItems.push({
+          price: premiumPriceId,
+          quantity: 1,
+        });
+      } else {
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "3000 Credits Pack",
+              description: "Generate up to 3000 leads (1 credit = 1 lead), includes 30 storage packages"
+            },
+            unit_amount: 6900, // $69.00
+          },
+          quantity: 1,
+        });
+      }
     }
 
     // Get the origin from the request headers

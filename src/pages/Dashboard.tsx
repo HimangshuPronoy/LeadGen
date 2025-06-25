@@ -18,7 +18,7 @@ interface DashboardStats {
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { subscription, createPayment, refreshSubscription } = useSubscription();
+  const { subscription, createPayment, refreshSubscription, creditsRemaining } = useSubscription();
   const { toast } = useToast();
   const [stats, setStats] = useState<DashboardStats>({
     totalLeads: 0,
@@ -53,7 +53,7 @@ const Dashboard = () => {
 
   // Fetch real dashboard stats
   useEffect(() => {
-    if (user && subscription) {
+    if (user) {
       fetchDashboardStats();
     }
   }, [user, subscription]);
@@ -148,7 +148,7 @@ const Dashboard = () => {
   ];
 
   // If no subscription, show upgrade prompt
-  if (!subscription) {
+  if (false && !subscription) {
     return (
       <div className="p-8 space-y-8">
         <div className="text-center py-16">
@@ -200,25 +200,46 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Subscription Status */}
-      <Card className="border-green-200 bg-green-50">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+      {/* Credits / Subscription Status */}
+      {subscription ? (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-green-900">Active Subscription</h3>
+                <p className="text-green-700 capitalize">{subscription.plan_type} Plan</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-green-600">
+                  {subscription.leads_per_month} total credits
+                </p>
+                <p className="text-sm text-green-600">
+                  {creditsRemaining} credits remaining
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="p-6 flex items-center justify-between">
             <div>
-              <h3 className="font-medium text-green-900">Active Subscription</h3>
-              <p className="text-green-700 capitalize">{subscription.plan_type} Plan</p>
+              <h3 className="font-medium text-yellow-900">No Credits</h3>
+              <p className="text-yellow-700">Purchase a credit pack to start generating leads.</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-green-600">
-                {subscription.leads_per_month === -1 ? 'Unlimited' : subscription.leads_per_month} leads/month
-              </p>
-              <p className="text-sm text-green-600">
-                {subscription.max_storage_packages} storage packages
-              </p>
+            <div className="flex gap-2">
+              <Button onClick={() => createPayment('basic')} className="bg-gray-900 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                1000 Credits ($49)
+              </Button>
+              <Button onClick={() => createPayment('premium')} className="bg-blue-600 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                3000 Credits ($69)
+              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

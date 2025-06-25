@@ -18,12 +18,13 @@ const LeadSearch = () => {
   const [industry, setIndustry] = useState('');
   const [location, setLocation] = useState('');
   const [companySize, setCompanySize] = useState('');
+  const [leadCount, setLeadCount] = useState<number>(10);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [selectedLeads, setSelectedLeads] = useState<Set<number>>(new Set());
   const { toast } = useToast();
   const { user, loading } = useAuth();
-  const { subscription, canGenerateLeads, canSavePackage } = useSubscription();
+  const { subscription, canGenerateLeads, canSavePackage, creditsRemaining, refreshSubscription } = useSubscription();
   const navigate = useNavigate();
 
   // Redirect to auth if not logged in
@@ -32,11 +33,8 @@ const LeadSearch = () => {
     return null;
   }
 
-  // Check subscription access
-  if (!loading && !subscription) {
-    navigate('/dashboard');
-    return null;
-  }
+  // Allow access without subscription; credit enforcement handled via canGenerateLeads flag
+
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,8 +42,27 @@ const LeadSearch = () => {
     if (!canGenerateLeads) {
       toast({
         variant: "destructive",
-        title: "Monthly limit reached",
-        description: "You've reached your monthly lead generation limit. Upgrade your plan to continue.",
+        title: "Out of credits",
+        description: "You've run out of credits. Purchase a new credit pack to continue generating leads.",
+      });
+      return;
+    }
+    
+    // Validate requested lead count
+    if (leadCount < 1 || leadCount > 100) {
+      toast({
+        variant: "destructive",
+        title: "Invalid lead count",
+        description: "Please choose between 1 and 100 leads per generation.",
+      });
+      return;
+    }
+
+    if (leadCount > creditsRemaining) {
+      toast({
+        variant: "destructive",
+        title: "Not enough credits",
+        description: `You only have ${creditsRemaining} credits left but requested ${leadCount} leads.`,
       });
       return;
     }
@@ -73,6 +90,7 @@ const LeadSearch = () => {
           industry,
           location,
           companySize,
+          leadCount,
         }
       });
       
@@ -85,6 +103,16 @@ const LeadSearch = () => {
       
       const leads = data?.leads || [];
       setResults(leads);
+
+      // Deduct used credits
+      if (subscription) {
+        const used = leads.length;
+        await supabase
+          .from('subscriptions')
+          .update({ current_month_leads: subscription.current_month_leads + used })
+          .eq('id', subscription.id);
+        refreshSubscription();
+      }
       
       // Save search to history
       try {
@@ -261,7 +289,7 @@ const LeadSearch = () => {
           {subscription && (
             <div className="mt-8 flex justify-center gap-4 text-sm text-gray-600">
               <span className="bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                {subscription.plan_type === 'premium' ? 'Unlimited' : `${subscription.leads_per_month - subscription.current_month_leads} searches left`}
+                {creditsRemaining} credits left
               </span>
               <span className="bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                 {subscription.max_storage_packages - subscription.used_storage_packages} packages available
@@ -350,6 +378,18 @@ const LeadSearch = () => {
                 </div>
               </div>
 
+              <div className="space-y-3 mt-6">
+                <Label className="font-medium text-gray-900">Number of Leads (1-100)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={leadCount}
+                  onChange={(e) => setLeadCount(Number(e.target.value))}
+                  className="border-0 border-b-2 border-gray-200 rounded-none bg-transparent focus:border-gray-900 h-12 placeholder:text-gray-400"
+                />
+              </div>
+
               <div className="pt-6">
                 <Button
                   type="submit"
@@ -364,7 +404,7 @@ const LeadSearch = () => {
                   ) : !canGenerateLeads ? (
                     <>
                       <Search className="mr-3 h-5 w-5" />
-                      Monthly Limit Reached
+                      Out of Credits
                     </>
                   ) : (
                     <>

@@ -9,10 +9,10 @@ const Pricing = () => {
     {
       name: "Basic",
       price: "$49",
-      period: " one-time",
-      description: "Perfect for small businesses getting started",
+      period: " credit pack",
+      description: "Purchase 1000 credits up front. Ideal for small businesses getting started.",
       features: [
-        "500 lead generations per month",
+        "1000 credits (1 lead = 1 credit)",
         "Save up to 15 lead packages",
         "AI-powered search",
         "Email export",
@@ -24,10 +24,10 @@ const Pricing = () => {
     {
       name: "Premium", 
       price: "$69",
-      period: " one-time",
-      description: "For growing businesses that need more leads",
+      period: " credit pack",
+      description: "Purchase 3000 credits and save more per lead. Great for growing teams.",
       features: [
-        "Unlimited lead generations per month",
+        "3000 credits (1 lead = 1 credit)",
         "Save up to 30 lead packages", 
         "Advanced AI targeting",
         "Multiple export formats",
@@ -128,7 +128,7 @@ const Pricing = () => {
             {[
               {
                 question: "How does lead generation work?",
-                answer: "Our AI analyzes millions of data points to find prospects that match your criteria. Basic plan includes 500 generations per month, Premium includes unlimited."
+                answer: "Our AI analyzes millions of data points to find prospects that match your criteria. Each credit lets you generate one high-quality lead. Basic pack contains 1000 credits, and Premium pack contains 3000 credits. You can generate up to 100 leads at a time until your credits run out."
               },
               {
                 question: "What are lead packages?",
